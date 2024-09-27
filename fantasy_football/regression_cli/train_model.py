@@ -10,11 +10,11 @@ def get_ff_model():
     df_dict = {}
     for pos, cutoff in positions:
         df_dict[pos] = df[(df.FantPos == pos) & (df.Fantasy_PosRank <= cutoff)].reset_index(drop=True)
-
+        
     model_dict = {}
     for pos, cutoff in positions:
         model_dict[pos] = LinearRegression()
-        X = df_dict[pos][['Opps_g', 'ScrmYds_g']]
+        X = df_dict[pos][['Rushing_Att_g', 'Catches_g', 'ScrmYds_g']]
         y = df_dict[pos][['Fantasy_PPR_g']]
         model_dict[pos].fit(X, y)
         print(f'R-squared for {pos} regression: {model_dict[pos].score(X, y)}')
