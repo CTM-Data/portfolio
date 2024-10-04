@@ -1,6 +1,13 @@
 import pandas as pd
 import train_model
 
+
+positions = [
+    ('QB', ['PassAtt_g', 'PassYds_g', 'RushAtt_g', 'ScrmYds_g']), 
+    ('RB', ['RushAtt_g', 'Targets_g', 'Catches_g', 'ScrmYds_g']), 
+    ('WR', ['Targets_g', 'Catches_g', 'ScrmYds_g']), 
+    ('TE', ['Targets_g', 'Catches_g', 'ScrmYds_g'])
+]
 year = 2024
 url = rf'https://www.pro-football-reference.com/years/{year}/fantasy.htm#fantasy'
 df = pd.read_html(url, skiprows=0)[0]
@@ -15,19 +22,25 @@ df = df.drop(labels=mask)
 numeric_cols = [col for col in df.columns if col not in ['Player', 'Tm', 'FantPos']]
 for col in numeric_cols: 
     df.loc[:, col] = pd.to_numeric(df[col])
-df = df.loc[df.Games_G != 0].reset_index(drop=True)
 
-df['Opps_g'] = (df.Rushing_Att + df.Receiving_Tgt) / df.Games_G
-df['ScrmYds_g'] = (df.Rushing_Yds + df.Receiving_Yds) / df.Games_G
-df['Rushing_Att_g'] = df.Rushing_Att / df.Games_G
+df = df.loc[df.Games_G != 0].reset_index(drop=True)
+df['PassAtt_g'] = df.Passing_Att / df.Games_G
+df['PassYds_g'] = df.Passing_Yds / df.Games_G
+df['RushAtt_g'] = df.Rushing_Att / df.Games_G
+df['Targets_g'] = df.Receiving_Tgt / df.Games_G
 df['Catches_g'] = df.Receiving_Rec / df.Games_G
-df['Fantasy_PPR_g'] = df.Fantasy_PPR / df.Games_G
+df['ScrmYds_g'] = (df.Rushing_Yds + df.Receiving_Yds) / df.Games_G
+df['PPR_g'] = df.Fantasy_PPR / df.Games_G
 
 model_dict = train_model.get_ff_model()
 
+#TODO: retest this script after resolving the NAN issue in train_model
 # add projection column, referencing model_dict
-df['PPR_Projection'] = df.apply(lambda row: model_dict[row.FantPos].predict([[row.Rushing_Att_g, row.Catches_g, row.ScrmYds_g]]) if row.FantPos in model_dict.keys() else None, axis=1)
-df.loc[:, 'PPR_Projection'] = df['PPR_Projection'].astype(float)
+df['Projection'] = 0
+for pos, cols in positions:
+    df.loc[df.FantPos == pos, 'Projection'] = model_dict[pos].predict([df.loc[df.FantPos == pos, cols]])
+# df['PPR_Projection'] = df.apply(lambda row: model_dict[row.FantPos].predict([[row.Rushing_Att_g, row.Catches_g, row.ScrmYds_g]]) if row.FantPos in model_dict.keys() else None, axis=1)
+df.loc[:, 'Projection'] = df['Projection'].astype(float)
 def main():
     running = True
     while running:

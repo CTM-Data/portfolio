@@ -20,10 +20,4 @@ for year in years:
     df_temp['Year'] = year
     df = pd.concat([df, df_temp], ignore_index=True)
 
-df['Opps_g'] = (df.Rushing_Att + df.Receiving_Tgt) / df.Games_G
-df['ScrmYds_g'] = (df.Rushing_Yds + df.Receiving_Yds) / df.Games_G
-df['Rushing_Att_g'] = df.Rushing_Att / df.Games_G
-df['Catches_g'] = df.Receiving_Rec / df.Games_G
-df['Fantasy_PPR_g'] = df.Fantasy_PPR / df.Games_G
-
 df.to_csv(f'./training_data/ff_training_{min}_{max}.csv', index=False)
