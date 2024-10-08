@@ -21,7 +21,7 @@ def main():
         if choice == '1': 
             names = input('Enter the name(s) of your player(s) separated by commas: ')
             names = [name.title() for name in names.split(', ')]
-            res = df.loc[df.Player.isin(names), ['Player', 'FantPos', 'Prediction']].sort_values(by=['FantPos', 'Prediction'], ascending=[True, False]).reset_index(drop=True)
+            res = df.loc[df.Player.isin(names), ['Player', 'FantPos', 'Games_G', 'Prediction']].sort_values(by=['FantPos', 'Prediction'], ascending=[True, False]).reset_index(drop=True)
             print(res)
             exit = input('Exit program? (Y/N) ')
             if exit.upper() == 'Y':
