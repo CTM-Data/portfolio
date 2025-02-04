@@ -1,0 +1,5 @@
+flow: 
+	1. copy and paste team information into an excel template
+	2. find a way to rank my players
+	3. find a way to compare per game statistics of my entire team against opponents
+	4. spit out recommendations on what categories I should contest
